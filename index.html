@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Ticket Status</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- TOP NAVBAR -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="logo">
+        <span class="logo-icon"></span>
+        <span class="logo-text">BlueKaktus</span>
+        <span class="logo-sub">Tech Fashion Productivity</span>
+      </div>
+      <nav class="main-nav">
+        <a href="#">Dashboard</a>
+        <a href="#" class="active">Ticket Status</a>
+        <a href="#">Reports ▾</a>
+        <a href="#">Configuration ▾</a>
+      </nav>
+    </div>
+    <div class="topbar-right">
+      <button class="btn-add" id="addTicketBtn">Add Ticket ▾</button>
+      <div class="user-btn">
+        <span class="user-icon">👤</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- PAGE CONTENT -->
+  <main class="page">
+    <!-- FILTER CARD -->
+    <section class="filter-card">
+      <div class="filter-row">
+        <div class="field">
+          <label>User</label>
+          <div class="select-wrapper">
+            <select id="fUser">
+              <option>Shubham</option>
+            </select>
+            <span class="select-arrow">▾</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>Client</label>
+          <div class="select-wrapper">
+            <select id="fClient">
+              <option>Select</option>
+            </select>
+            <span class="select-arrow">▾</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>Status</label>
+          <div class="select-wrapper">
+            <select id="fStatus">
+              <option>Pending</option>
+              <option>Open</option>
+              <option>Closed</option>
+            </select>
+            <span class="select-arrow">▾</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>Project</label>
+          <div class="select-wrapper">
+            <select id="fProject">
+              <option>Select</option>
+            </select>
+            <span class="select-arrow">▾</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>Priority</label>
+          <div class="select-wrapper">
+            <select id="fPriority">
+              <option>Select</option>
+            </select>
+            <span class="select-arrow">▾</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="filter-row">
+        <div class="field">
+          <label>Department</label>
+          <div class="select-wrapper">
+            <select id="fDept">
+              <option>Select</option>
+            </select>
+            <span class="select-arrow">▾</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>Module</label>
+          <div class="select-wrapper">
+            <select id="fModule">
+              <option>Select</option>
+            </select>
+            <span class="select-arrow">▾</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>Type</label>
+          <div class="select-wrapper">
+            <select id="fType">
+              <option>Select</option>
+            </select>
+            <span class="select-arrow">▾</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>Source</label>
+          <div class="select-wrapper">
+            <select id="fSource">
+              <option>Select</option>
+            </select>
+            <span class="select-arrow">▾</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>Assignee</label>
+          <div class="select-wrapper">
+            <select id="fAssignee">
+              <option>Select</option>
+            </select>
+            <span class="select-arrow">▾</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="filter-row">
+        <div class="field">
+          <label>Date From</label>
+          <div class="input-with-icon">
+            <input type="date" id="fDateFrom" />
+            <span class="calendar-icon">📅</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>Date To</label>
+          <div class="input-with-icon">
+            <input type="date" id="fDateTo" />
+            <span class="calendar-icon">📅</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>Target Date From</label>
+          <div class="input-with-icon">
+            <input type="date" id="fTargetFrom" />
+            <span class="calendar-icon">📅</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>Target Date To</label>
+          <div class="input-with-icon">
+            <input type="date" id="fTargetTo" />
+            <span class="calendar-icon">📅</span>
+          </div>
+        </div>
+        <div class="field checkbox-field">
+          <label class="checkbox-label">
+            <input type="checkbox" id="fComplete" />
+            <span>Complete Tickets</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="filter-actions">
+        <button class="btn btn-blue" id="displayBtn">Display</button>
+        <button class="btn btn-gray" id="resetBtn">Reset</button>
+        <button class="btn btn-outline" id="excelBtn">⭳ Excel</button>
+      </div>
+    </section>
+
+    <!-- TABLE CARD -->
+    <section class="table-card">
+      <table id="ticketTable">
+        <thead>
+          <tr class="header-row">
+            <th>Ticket No</th>
+            <th>Report Date</th>
+            <th>Ticket Type</th>
+            <th>Module</th>
+            <th>Ticket Priority</th>
+            <th>Call Desc</th>
+            <th>Client Name</th>
+            <th>Ticket Status</th>
+            <th>Entry By</th>
+            <th>Curr Owner</th>
+            <th>Target Date</th>
+            <th>Client Target Date</th>
+            <th>Entry Date</th>
+            <th>Source</th>
+            <th>Developer Remarks</th>
+            <th>Action</th>
+          </tr>
+          <tr class="search-row">
+            <th><input type="text" data-col="0" placeholder="Search" /></th>
+            <th><input type="text" data-col="1" placeholder="Search" /></th>
+            <th><input type="text" data-col="2" placeholder="Search" /></th>
+            <th><input type="text" data-col="3" placeholder="Search" /></th>
+            <th><input type="text" data-col="4" placeholder="Search" /></th>
+            <th><input type="text" data-col="5" placeholder="Search" /></th>
+            <th><input type="text" data-col="6" placeholder="Search" /></th>
+            <th><input type="text" data-col="7" placeholder="Search" /></th>
+            <th><input type="text" data-col="8" placeholder="Search" /></th>
+            <th><input type="text" data-col="9" placeholder="Search" /></th>
+            <th><input type="text" data-col="10" placeholder="Search" /></th>
+            <th><input type="text" data-col="11" placeholder="Search" /></th>
+            <th><input type="text" data-col="12" placeholder="Search" /></th>
+            <th><input type="text" data-col="13" placeholder="Search" /></th>
+            <th><input type="text" data-col="14" placeholder="Search" /></th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+  </main>
+
+  <!-- ADD TICKET MODAL -->
+  <div class="modal" id="ticketModal">
+    <div class="modal-backdrop"></div>
+
+    <div class="ticket-modal">
+      <div class="ticket-modal-header">
+        <h3>Add Ticket</h3>
+        <button class="ticket-modal-close" id="closeModalBtn">✕</button>
+      </div>
+
+      <form id="ticketForm" class="ticket-modal-body">
+        <div class="ticket-grid">
+          <div class="field">
+            <label>Ticket No</label>
+            <input type="text" id="mTicketNo" readonly />
+          </div>
+
+          <div class="field">
+            <label>Entry By</label>
+            <input type="text" id="mEntryBy" value="Shubham" readonly />
+          </div>
+
+          <div class="field">
+            <label>Report Date *</label>
+            <div class="input-with-icon">
+              <input type="date" id="mReportDate" required />
+              <span class="calendar-icon">📅</span>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Client *</label>
+            <div class="select-wrapper">
+              <select id="mClient" required>
+                <option value="" disabled selected>Select</option>
+                <option>ABC Garments</option>
+                <option>XYZ Textiles</option>
+                <option>Fashion Hub Pvt Ltd</option>
+                <option>Blue Denim Co</option>
+              </select>
+              <span class="select-arrow">▾</span>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Project *</label>
+            <div class="select-wrapper">
+              <select id="mProject" required>
+                <option value="" disabled selected>Select</option>
+                <option>ERP Implementation</option>
+                <option>Inventory Optimization</option>
+                <option>Order Management</option>
+                <option>Billing Automation</option>
+              </select>
+              <span class="select-arrow">▾</span>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Module *</label>
+            <div class="select-wrapper">
+              <select id="mModule" required>
+                <option value="" disabled selected>Select</option>
+                <option>Inventory</option>
+                <option>Sales</option>
+                <option>Purchase</option>
+                <option>Planning</option>
+                <option>Reports</option>
+              </select>
+              <span class="select-arrow">▾</span>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Type *</label>
+            <div class="select-wrapper">
+              <select id="mType" required>
+                <option value="" disabled selected>Select</option>
+                <option>Bug</option>
+                <option>Change Request</option>
+                <option>New Requirement</option>
+                <option>Support</option>
+              </select>
+              <span class="select-arrow">▾</span>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Change Type</label>
+            <div class="select-wrapper">
+              <select id="mChangeType">
+                <option value="" disabled selected>Select</option>
+                <option>UI Change</option>
+                <option>Logic Change</option>
+                <option>Report Change</option>
+              </select>
+              <span class="select-arrow">▾</span>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Priority *</label>
+            <div class="select-wrapper">
+              <select id="mPriority" required>
+                <option value="" disabled selected>Select</option>
+                <option>Low</option>
+                <option>Medium</option>
+                <option>High</option>
+                <option>Critical</option>
+              </select>
+              <span class="select-arrow">▾</span>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Report By *</label>
+            <div class="select-wrapper">
+              <select id="mReportBy" required>
+                <option value="" disabled selected>Select</option>
+                <option>Client User</option>
+                <option>Key User</option>
+                <option>Internal QA</option>
+              </select>
+              <span class="select-arrow">▾</span>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Email ID *</label>
+            <input type="email" id="mEmail" placeholder="Email Id" required />
+          </div>
+
+          <div class="field">
+            <label>Status</label>
+            <div class="select-wrapper">
+              <select id="mStatus">
+                <option value="Pending">Pending</option>
+                <option value="Open">Open</option>
+                <option value="Closed">Closed</option>
+              </select>
+              <span class="select-arrow">▾</span>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Commit Date *</label>
+            <div class="input-with-icon">
+              <input type="date" id="mCommitDate" required />
+              <span class="calendar-icon">📅</span>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Source *</label>
+            <div class="select-wrapper">
+              <select id="mSource" required>
+                <option value="" disabled selected>Select</option>
+                <option>By Mail</option>
+                <option>By Call</option>
+                <option>WhatsApp</option>
+                <option>Portal</option>
+              </select>
+              <span class="select-arrow">▾</span>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>&nbsp;</label>
+            <button type="button" class="icon-btn" id="clearSourceBtn">✕</button>
+          </div>
+
+          <div class="field full">
+            <label>Call Description *</label>
+            <input type="text" id="mCallDesc" placeholder="Enter description" required />
+          </div>
+        </div>
+
+        <div class="ticket-modal-footer">
+          <button type="submit" class="btn btn-blue">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- HIDDEN FORM for Google Apps Script (no CORS) -->
+  <form
+    id="gsForm"
+    action="http://localhost/ticket_tool/save_ticket.php"
+    method="post"
+    target="hiddenFrame"
+    style="display:none;"
+  ></form>
+  <iframe name="hiddenFrame" style="display:none;"></iframe>
+
+  <script src="script.js"></script>
+</body>
+</html>
