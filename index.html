@@ -1,420 +1,484 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Ticket Status</title>
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Enterprise MOM Generator v6.0</title>
+    
+    <!-- Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
 </head>
-<body>
-  <!-- TOP NAVBAR -->
-  <header class="topbar">
-    <div class="topbar-left">
-      <div class="logo">
-        <span class="logo-icon"></span>
-        <span class="logo-text">BlueKaktus</span>
-        <span class="logo-sub">Tech Fashion Productivity</span>
-      </div>
-      <nav class="main-nav">
-        <a href="#">Dashboard</a>
-        <a href="#" class="active">Ticket Status</a>
-        <a href="#">Reports ▾</a>
-        <a href="#">Configuration ▾</a>
-      </nav>
+<body class="bg-slate-100 text-slate-800">
+
+    <!-- Navbar -->
+    <nav class="bg-slate-900 text-white sticky top-0 z-50 shadow-lg no-print">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-file-contract text-blue-400 text-xl"></i>
+                <span class="font-bold text-lg hidden sm:block">Enterprise MOM Generator</span>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="loadDemoData()" class="text-xs font-bold text-slate-300 hover:text-white border border-slate-600 hover:border-white px-3 py-2 rounded transition-all">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Demo Data
+                </button>
+                <button onclick="printPDF()" class="bg-blue-600 hover:bg-blue-500 px-5 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all shadow-lg shadow-blue-500/30">
+                    <i class="fa-solid fa-download"></i> Export PDF
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="w-full pb-20">
+        
+        <!-- Document Container -->
+        <div id="document-root" class="document-container relative">
+            <div class="watermark">CONFIDENTIAL</div>
+
+            <!-- 1. MEETING DETAILS -->
+            <section id="sec-header" class="section-header">
+                <div class="header-content">
+                    <div>
+                        <h1 class="text-4xl font-extrabold text-slate-900 mb-2">MINUTES OF MEETING</h1>
+                        <input type="text" id="meeting-title" placeholder="Meeting Title" class="text-2xl font-semibold text-slate-700 w-full placeholder-slate-300 bg-transparent border-b-2 border-slate-300 pb-2">
+                    </div>
+                    <div class="text-right">
+                        <select id="confidentiality" class="bg-red-50 text-red-700 px-3 py-1 rounded border border-red-200 text-xs font-bold inline-block mb-2 cursor-pointer">
+                            <option>CONFIDENTIAL: HIGH</option>
+                            <option>CONFIDENTIAL: MEDIUM</option>
+                            <option>PUBLIC / INTERNAL</option>
+                        </select>
+                        <input type="text" id="meeting-id" placeholder="MOM-XXX" class="text-xs text-slate-400 font-mono w-full block text-right mt-2">
+                    </div>
+                </div>
+                <div class="header-grid">
+                    <div><span class="grid-label">Date</span><input type="date" id="meeting-date" class="grid-input"></div>
+                    <div><span class="grid-label">Time</span><div class="flex gap-1"><input type="time" id="start-time" class="grid-input"><span class="text-slate-400"></span><input type="time" id="end-time" class="grid-input"></div></div>
+                    <div><span class="grid-label">Venue</span><input type="text" id="venue" class="grid-input" placeholder="Location"></div>
+                    <div><span class="grid-label">Chairperson</span><input type="text" id="chairperson" class="grid-input" placeholder="Name"></div>
+                </div>
+            </section>
+
+            <!-- 2. PARTICIPANTS -->
+            <section id="sec-participants" class="section-box">
+                <div class="section-header-with-buttons">
+                    <h2 class="section-title">
+                        <span class="section-num"></span> Participants
+                        <div class="tooltip-container no-print">
+                            <i class="fa-solid fa-circle-info text-slate-400 hover:text-blue-500 cursor-help ml-2 text-sm"></i>
+                            <div class="tooltip-box">List all attendees, absentees, and external guests.</div>
+                        </div>
+                    </h2>
+                    <div class="section-buttons no-print">
+                        <button onclick="openParticipantModal()" class="btn-add"><i class="fa-solid fa-plus"></i> Add</button>
+                        <button onclick="removeSection('sec-participants')" class="btn-delete"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                </div>
+                <div class="table-wrapper">
+                    <table class="table-standard">
+                        <thead>
+                            <tr><th>Status</th><th>Name</th><th>Role</th><th class="no-print">Actions</th></tr>
+                        </thead>
+                        <tbody id="participants-list"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 3. AGENDA -->
+            <section id="sec-agenda" class="section-box">
+                <div class="section-header-with-buttons">
+                    <h2 class="section-title">
+                        <span class="section-num"></span> Agenda
+                        <div class="tooltip-container no-print">
+                            <i class="fa-solid fa-circle-info text-slate-400 hover:text-blue-500 cursor-help ml-2 text-sm"></i>
+                            <div class="tooltip-box">Outline the key topics discussed during the meeting.</div>
+                        </div>
+                    </h2>
+                    <div class="section-buttons no-print">
+                        <button onclick="addAgendaItem()" class="btn-add"><i class="fa-solid fa-plus"></i> Add</button>
+                        <button onclick="removeSection('sec-agenda')" class="btn-delete"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                </div>
+               <ul id="agenda-list" class="box-container"></ul>
+
+            </section>
+
+            <!-- 4. DISCUSSION -->
+            <section id="sec-discussion" class="section-box">
+                <div class="section-header-with-buttons">
+                    <h2 class="section-title">
+                        <span class="section-num"></span> Discussion Summary
+                        <div class="tooltip-container no-print">
+                            <i class="fa-solid fa-circle-info text-slate-400 hover:text-blue-500 cursor-help ml-2 text-sm"></i>
+                            <div class="tooltip-box">Summarize the main points of discussion and debate.</div>
+                        </div>
+                    </h2>
+                    <div class="section-buttons no-print">
+                        <button onclick="removeSection('sec-discussion')" class="btn-delete"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                </div>
+                <textarea id="discussion-text" class="textarea-standard" placeholder="Type discussion points..."></textarea>
+            </section>
+
+            <!-- 5. DECISIONS -->
+           <section id="sec-decisions" class="section-box">
+    <div class="section-header-with-buttons">
+        <h2 class="section-title">
+            <span class="section-num"></span>
+            <span>Decisions Taken</span>
+
+            <span class="tooltip-container no-print">
+                <i class="fa-solid fa-circle-info text-slate-400 hover:text-blue-500 cursor-help text-sm"></i>
+                <span class="tooltip-box">Record final decisions and their rationale.</span>
+            </span>
+        </h2>
+
+        <div class="section-buttons no-print">
+            <button onclick="addDecision()" class="btn-add">
+                <i class="fa-solid fa-plus"></i> Add
+            </button>
+            <button onclick="removeSection('sec-decisions')" class="btn-delete">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
     </div>
-    <div class="topbar-right">
-      <button class="btn-add" id="addTicketBtn">Add Ticket ▾</button>
-      <div class="user-btn">
-        <span class="user-icon">👤</span>
-      </div>
+
+    <div id="decisions-list" class="space-y-3"></div>
+</section>
+
+
+            <!-- 6. ACTION ITEMS -->
+            <section id="sec-action" class="section-box">
+                <div class="section-header-with-buttons">
+                    <h2 class="section-title">
+                        <span class="section-num"></span> Action Items
+                         <div class="tooltip-container no-print">
+                            <i class="fa-solid fa-circle-info text-slate-400 hover:text-blue-500 cursor-help ml-2 text-sm"></i>
+                            <div class="tooltip-box">Assign tasks with owners and deadlines.</div>
+                        </div>
+                    </h2>
+                    <div class="section-buttons no-print">
+                        <button onclick="addActionItem()" class="btn-add"><i class="fa-solid fa-plus"></i> Add</button>
+                        <button onclick="removeSection('sec-action')" class="btn-delete"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                </div>
+                <div class="table-wrapper">
+                    <table class="table-standard">
+                        <thead>
+                            <tr><th>Action Item</th><th>Owner</th><th>Priority</th><th>Due Date</th><th class="no-print">Actions</th></tr>
+                        </thead>
+                        <tbody id="action-list"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 7. RISKS -->
+            <section id="sec-risks" class="section-box">
+                <div class="section-header-with-buttons">
+                    <h2 class="section-title">
+                        <span class="section-num"></span> Risks & Blockers
+                         <div class="tooltip-container no-print">
+                            <i class="fa-solid fa-circle-info text-slate-400 hover:text-blue-500 cursor-help ml-2 text-sm"></i>
+                            <div class="tooltip-box">Identify potential risks and mitigation plans.</div>
+                        </div>
+                    </h2>
+                    <div class="section-buttons no-print">
+                        <button onclick="addRisk()" class="btn-add"><i class="fa-solid fa-plus"></i> Add</button>
+                        <button onclick="removeSection('sec-risks')" class="btn-delete"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                </div>
+                <div id="risks-list" class="space-y-2"></div>
+            </section>
+
+            <!-- 8. DEPENDENCIES -->
+            <section id="sec-dependencies" class="section-box">
+                <div class="section-header-with-buttons">
+                    <h2 class="section-title">
+                        <span class="section-num"></span> Dependencies
+                         <div class="tooltip-container no-print">
+                            <i class="fa-solid fa-circle-info text-slate-400 hover:text-blue-500 cursor-help ml-2 text-sm"></i>
+                            <div class="tooltip-box">List external factors or approvals required.</div>
+                        </div>
+                    </h2>
+                    <div class="section-buttons no-print">
+                        <button onclick="addDependency()" class="btn-add"><i class="fa-solid fa-plus"></i> Add</button>
+                        <button onclick="removeSection('sec-dependencies')" class="btn-delete"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                </div>
+<ul id="dependencies-list" class="box-container"></ul>
+
+
+            <!-- 9. METRICS -->
+            <section id="sec-metrics" class="section-box">
+                <div class="section-header-with-buttons">
+                    <h2 class="section-title">
+                        <span class="section-num"></span> Metrics / KPIs
+                         <div class="tooltip-container no-print">
+                            <i class="fa-solid fa-circle-info text-slate-400 hover:text-blue-500 cursor-help ml-2 text-sm"></i>
+                            <div class="tooltip-box">Track key performance indicators discussed.</div>
+                        </div>
+                    </h2>
+                    <div class="section-buttons no-print">
+                        <button onclick="addMetric()" class="btn-add"><i class="fa-solid fa-plus"></i> Add</button>
+                        <button onclick="removeSection('sec-metrics')" class="btn-delete"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                </div>
+<div id="metrics-list" class="box-container"></div>
+
+
+             <!-- 10. ATTACHMENTS & REFERENCES (MERGED) -->
+            <section id="sec-attachments" class="section-box">
+                <div class="section-header-with-buttons">
+                    <h2 class="section-title">
+                        <span class="section-num"></span> Attachments & References
+                         <div class="tooltip-container no-print">
+                            <i class="fa-solid fa-circle-info text-slate-400 hover:text-blue-500 cursor-help ml-2 text-sm"></i>
+                            <div class="tooltip-box">List attached files and external reference links.</div>
+                        </div>
+                    </h2>
+                    <div class="section-buttons no-print">
+                        <button onclick="addDocLink()" class="btn-add"><i class="fa-solid fa-link"></i> Add Link</button>
+                        <button onclick="openAttachmentPicker()" class="btn-add"><i class="fa-solid fa-paperclip"></i> Add Attachment</button>
+                        <button onclick="removeSection('sec-attachments')" class="btn-delete"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                </div>
+                <div class="space-y-3">
+                     <!-- Attachment Input (user-visible filenames) -->
+                    <div class="flex items-center gap-2 border border-slate-200 rounded p-2 bg-slate-50">
+                        <!-- <i class="fa-solid fa-paperclip text-slate-400"></i> -->
+                        <!-- <input type="text" id="attachment-names" class="bg-transparent border-none w-full text-sm" placeholder="File names (e.g. Budget_v1.xlsx)"> -->
+                    </div>
+
+                    <!-- Hidden file input used by "Add Attachment" -->
+                    <input
+                      type="file"
+                      id="attachment-input"
+                      class="hidden"
+                      multiple
+                      accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg"
+                      onchange="handleAttachmentUpload(event)">
+
+                    <!-- Links & Attachments list -->
+                    <ul id="docs-list" class="space-y-1 text-sm text-slate-700"></ul>
+                </div>
+            </section>
+
+            <!-- 11. FOLLOW UP -->
+            <section id="sec-followup" class="section-box">
+                <div class="section-header-with-buttons">
+                    <h2 class="section-title">
+                        <span class="section-num"></span> Follow-up / Next Steps
+                         <div class="tooltip-container no-print">
+                            <i class="fa-solid fa-circle-info text-slate-400 hover:text-blue-500 cursor-help ml-2 text-sm"></i>
+                            <div class="tooltip-box">Plan for the next meeting and expected outcomes.</div>
+                        </div>
+                    </h2>
+                    <div class="section-buttons no-print">
+                        <button onclick="removeSection('sec-followup')" class="btn-delete"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-6 text-sm">
+                    <div><span class="grid-label">Next Meeting Date</span><input type="date" id="next-date" class="grid-input"></div>
+                    <div><span class="grid-label">Purpose</span><input type="text" id="next-purpose" class="grid-input" placeholder="e.g. Review Progress"></div>
+                    <div><span class="grid-label">Expected Outcomes</span><input type="text" id="next-outcome" class="grid-input" placeholder="e.g. Sign-off"></div>
+                </div>
+            </section>
+
+            <!-- 12. SUMMARY -->
+            <section id="sec-summary" class="summary-box">
+                <div>
+                    <h3 class="text-lg font-bold text-white mb-1"><span class="inline-block bg-white text-slate-900 rounded px-2 text-xs py-0.5">AUTO</span> Meeting Summary</h3>
+                    <p class="text-slate-300 text-sm">Real-time statistics based on your inputs.</p>
+                </div>
+                <div class="flex gap-8">
+                    <div class="text-center"><div id="sum-decisions" class="text-3xl font-bold text-emerald-400">0</div><div class="text-xs text-slate-400 uppercase">Decisions</div></div>
+                    <div class="text-center"><div id="sum-actions" class="text-3xl font-bold text-blue-400">0</div><div class="text-xs text-slate-400 uppercase">Action Items</div></div>
+                </div>
+            </section>
+
+            <!-- 13. APPROVALS -->
+            <section id="sec-approvals" class="section-box">
+                <div class="section-header-with-buttons">
+                    <h2 class="section-title">
+                        <span class="section-num"></span> Approval & Sign-off
+                         <div class="tooltip-container no-print">
+                            <i class="fa-solid fa-circle-info text-slate-400 hover:text-blue-500 cursor-help ml-2 text-sm"></i>
+                            <div class="tooltip-box">Official signatures and approval names.</div>
+                        </div>
+                    </h2>
+                    <div class="section-buttons no-print">
+                        <button onclick="removeSection('sec-approvals')" class="btn-delete"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-6 text-sm">
+                    <div><span class="grid-label">Prepared By</span><input type="text" id="prepared-by" class="grid-input" placeholder="Name"></div>
+                    <div><span class="grid-label">Reviewed By</span><input type="text" id="reviewed-by" class="grid-input" placeholder="Name"></div>
+                    <div><span class="grid-label">Approved By</span><input type="text" id="approved-by" class="grid-input" placeholder="Name"></div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Restore Panel -->
+    <div id="restore-panel" class="fixed bottom-4 right-4 bg-slate-800 text-white p-4 rounded-lg shadow-2xl z-40 hidden w-64 no-print animate-slide-up">
+        <h4 class="text-xs font-bold uppercase text-slate-400 mb-2">Restorable Sections</h4>
+        <div id="restore-list" class="flex flex-col gap-2 text-sm"></div>
     </div>
-  </header>
 
-  <!-- PAGE CONTENT -->
-  <main class="page">
-    <!-- FILTER CARD -->
-    <section class="filter-card">
-      <div class="filter-row">
-        <div class="field">
-          <label>User</label>
-          <div class="select-wrapper">
-            <select id="fUser">
-              <option>Shubham</option>
-            </select>
-            <span class="select-arrow">▾</span>
-          </div>
-        </div>
-        <div class="field">
-          <label>Client</label>
-          <div class="select-wrapper">
-            <select id="fClient">
-              <option>Select</option>
-            </select>
-            <span class="select-arrow">▾</span>
-          </div>
-        </div>
-        <div class="field">
-          <label>Status</label>
-          <div class="select-wrapper">
-            <select id="fStatus">
-              <option>Pending</option>
-              <option>Open</option>
-              <option>Closed</option>
-            </select>
-            <span class="select-arrow">▾</span>
-          </div>
-        </div>
-        <div class="field">
-          <label>Project</label>
-          <div class="select-wrapper">
-            <select id="fProject">
-              <option>Select</option>
-            </select>
-            <span class="select-arrow">▾</span>
-          </div>
-        </div>
-        <div class="field">
-          <label>Priority</label>
-          <div class="select-wrapper">
-            <select id="fPriority">
-              <option>Select</option>
-            </select>
-            <span class="select-arrow">▾</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="filter-row">
-        <div class="field">
-          <label>Department</label>
-          <div class="select-wrapper">
-            <select id="fDept">
-              <option>Select</option>
-            </select>
-            <span class="select-arrow">▾</span>
-          </div>
-        </div>
-        <div class="field">
-          <label>Module</label>
-          <div class="select-wrapper">
-            <select id="fModule">
-              <option>Select</option>
-            </select>
-            <span class="select-arrow">▾</span>
-          </div>
-        </div>
-        <div class="field">
-          <label>Type</label>
-          <div class="select-wrapper">
-            <select id="fType">
-              <option>Select</option>
-            </select>
-            <span class="select-arrow">▾</span>
-          </div>
-        </div>
-        <div class="field">
-          <label>Source</label>
-          <div class="select-wrapper">
-            <select id="fSource">
-              <option>Select</option>
-            </select>
-            <span class="select-arrow">▾</span>
-          </div>
-        </div>
-        <div class="field">
-          <label>Assignee</label>
-          <div class="select-wrapper">
-            <select id="fAssignee">
-              <option>Select</option>
-            </select>
-            <span class="select-arrow">▾</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="filter-row">
-        <div class="field">
-          <label>Date From</label>
-          <div class="input-with-icon">
-            <input type="date" id="fDateFrom" />
-            <span class="calendar-icon">📅</span>
-          </div>
-        </div>
-        <div class="field">
-          <label>Date To</label>
-          <div class="input-with-icon">
-            <input type="date" id="fDateTo" />
-            <span class="calendar-icon">📅</span>
-          </div>
-        </div>
-        <div class="field">
-          <label>Target Date From</label>
-          <div class="input-with-icon">
-            <input type="date" id="fTargetFrom" />
-            <span class="calendar-icon">📅</span>
-          </div>
-        </div>
-        <div class="field">
-          <label>Target Date To</label>
-          <div class="input-with-icon">
-            <input type="date" id="fTargetTo" />
-            <span class="calendar-icon">📅</span>
-          </div>
-        </div>
-        <div class="field checkbox-field">
-          <label class="checkbox-label">
-            <input type="checkbox" id="fComplete" />
-            <span>Complete Tickets</span>
-          </label>
-        </div>
-      </div>
-
-      <div class="filter-actions">
-        <button class="btn btn-blue" id="displayBtn">Display</button>
-        <button class="btn btn-gray" id="resetBtn">Reset</button>
-        <button class="btn btn-outline" id="excelBtn">⭳ Excel</button>
-      </div>
-    </section>
-
-    <!-- TABLE CARD -->
-    <section class="table-card">
-      <table id="ticketTable">
-        <thead>
-          <tr class="header-row">
-            <th>Ticket No</th>
-            <th>Report Date</th>
-            <th>Ticket Type</th>
-            <th>Module</th>
-            <th>Ticket Priority</th>
-            <th>Call Desc</th>
-            <th>Client Name</th>
-            <th>Ticket Status</th>
-            <th>Entry By</th>
-            <th>Curr Owner</th>
-            <th>Target Date</th>
-            <th>Client Target Date</th>
-            <th>Entry Date</th>
-            <th>Source</th>
-            <th>Developer Remarks</th>
-            <th>Action</th>
-          </tr>
-          <tr class="search-row">
-            <th><input type="text" data-col="0" placeholder="Search" /></th>
-            <th><input type="text" data-col="1" placeholder="Search" /></th>
-            <th><input type="text" data-col="2" placeholder="Search" /></th>
-            <th><input type="text" data-col="3" placeholder="Search" /></th>
-            <th><input type="text" data-col="4" placeholder="Search" /></th>
-            <th><input type="text" data-col="5" placeholder="Search" /></th>
-            <th><input type="text" data-col="6" placeholder="Search" /></th>
-            <th><input type="text" data-col="7" placeholder="Search" /></th>
-            <th><input type="text" data-col="8" placeholder="Search" /></th>
-            <th><input type="text" data-col="9" placeholder="Search" /></th>
-            <th><input type="text" data-col="10" placeholder="Search" /></th>
-            <th><input type="text" data-col="11" placeholder="Search" /></th>
-            <th><input type="text" data-col="12" placeholder="Search" /></th>
-            <th><input type="text" data-col="13" placeholder="Search" /></th>
-            <th><input type="text" data-col="14" placeholder="Search" /></th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </section>
-  </main>
-
-  <!-- ADD TICKET MODAL -->
-  <div class="modal" id="ticketModal">
-    <div class="modal-backdrop"></div>
-
-    <div class="ticket-modal">
-      <div class="ticket-modal-header">
-        <h3>Add Ticket</h3>
-        <button class="ticket-modal-close" id="closeModalBtn">✕</button>
-      </div>
-
-      <form id="ticketForm" class="ticket-modal-body">
-        <div class="ticket-grid">
-          <div class="field">
-            <label>Ticket No</label>
-            <input type="text" id="mTicketNo" readonly />
-          </div>
-
-          <div class="field">
-            <label>Entry By</label>
-            <input type="text" id="mEntryBy" value="Shubham" readonly />
-          </div>
-
-          <div class="field">
-            <label>Report Date *</label>
-            <div class="input-with-icon">
-              <input type="date" id="mReportDate" required />
-              <span class="calendar-icon">📅</span>
+    <!-- Modal -->
+    <div id="participant-modal" class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-50 transition-opacity duration-300">
+        <div class="modal-overlay absolute w-full h-full bg-slate-900 opacity-50 backdrop-blur-sm" onclick="closeParticipantModal()"></div>
+        <div class="modal-container bg-white w-11/12 md:max-w-md mx-auto rounded-xl shadow-2xl z-50 overflow-y-auto transform transition-all scale-95 p-6">
+            <h3 class="text-xl font-bold text-slate-900 mb-4" id="modal-title">Add Participant</h3>
+            <div class="space-y-4">
+                <input type="hidden" id="edit-row-id">
+                <div>
+                    <label class="block text-sm font-bold text-slate-600 mb-1">Status</label>
+                    <select id="modal-status" class="w-full border border-slate-300 p-2 rounded text-sm" onchange="toggleLateInput()">
+                        <option value="Present">Present</option>
+                        <option value="Absent">Absent</option>
+                        <option value="Late Join">Late Join</option>
+                        <option value="External">External</option>
+                    </select>
+                </div>
+                <div id="late-time-container" class="hidden bg-orange-50 p-3 rounded border border-orange-200">
+                    <label class="block text-sm font-bold text-orange-700 mb-1">Minutes Late</label>
+                    <div class="flex gap-2">
+                        <input id="modal-late-min" type="number" min="1" class="w-20 border border-orange-200 p-2 rounded text-center font-bold text-orange-700" placeholder="15">
+                        <span class="text-sm text-orange-700 pt-2">minutes</span>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-600 mb-1">Full Name</label>
+                    <input id="modal-name" type="text" class="w-full border border-slate-300 p-2 rounded text-sm" placeholder="John Doe">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-600 mb-1">Role</label>
+                    <input id="modal-role" type="text" class="w-full border border-slate-300 p-2 rounded text-sm" placeholder="Senior Manager">
+                </div>
             </div>
-          </div>
-
-          <div class="field">
-            <label>Client *</label>
-            <div class="select-wrapper">
-              <select id="mClient" required>
-                <option value="" disabled selected>Select</option>
-                <option>ABC Garments</option>
-                <option>XYZ Textiles</option>
-                <option>Fashion Hub Pvt Ltd</option>
-                <option>Blue Denim Co</option>
-              </select>
-              <span class="select-arrow">▾</span>
+            <div class="flex justify-end gap-2 mt-6">
+                <button onclick="closeParticipantModal()" class="px-4 py-2 text-slate-600 font-medium text-sm hover:bg-slate-100 rounded">Cancel</button>
+                <button onclick="saveParticipant()" class="px-4 py-2 bg-blue-600 text-white rounded font-semibold text-sm hover:bg-blue-700">Save</button>
             </div>
-          </div>
-
-          <div class="field">
-            <label>Project *</label>
-            <div class="select-wrapper">
-              <select id="mProject" required>
-                <option value="" disabled selected>Select</option>
-                <option>ERP Implementation</option>
-                <option>Inventory Optimization</option>
-                <option>Order Management</option>
-                <option>Billing Automation</option>
-              </select>
-              <span class="select-arrow">▾</span>
-            </div>
-          </div>
-
-          <div class="field">
-            <label>Module *</label>
-            <div class="select-wrapper">
-              <select id="mModule" required>
-                <option value="" disabled selected>Select</option>
-                <option>Inventory</option>
-                <option>Sales</option>
-                <option>Purchase</option>
-                <option>Planning</option>
-                <option>Reports</option>
-              </select>
-              <span class="select-arrow">▾</span>
-            </div>
-          </div>
-
-          <div class="field">
-            <label>Type *</label>
-            <div class="select-wrapper">
-              <select id="mType" required>
-                <option value="" disabled selected>Select</option>
-                <option>Bug</option>
-                <option>Change Request</option>
-                <option>New Requirement</option>
-                <option>Support</option>
-              </select>
-              <span class="select-arrow">▾</span>
-            </div>
-          </div>
-
-          <div class="field">
-            <label>Change Type</label>
-            <div class="select-wrapper">
-              <select id="mChangeType">
-                <option value="" disabled selected>Select</option>
-                <option>UI Change</option>
-                <option>Logic Change</option>
-                <option>Report Change</option>
-              </select>
-              <span class="select-arrow">▾</span>
-            </div>
-          </div>
-
-          <div class="field">
-            <label>Priority *</label>
-            <div class="select-wrapper">
-              <select id="mPriority" required>
-                <option value="" disabled selected>Select</option>
-                <option>Low</option>
-                <option>Medium</option>
-                <option>High</option>
-                <option>Critical</option>
-              </select>
-              <span class="select-arrow">▾</span>
-            </div>
-          </div>
-
-          <div class="field">
-            <label>Report By *</label>
-            <div class="select-wrapper">
-              <select id="mReportBy" required>
-                <option value="" disabled selected>Select</option>
-                <option>Client User</option>
-                <option>Key User</option>
-                <option>Internal QA</option>
-              </select>
-              <span class="select-arrow">▾</span>
-            </div>
-          </div>
-
-          <div class="field">
-            <label>Email ID *</label>
-            <input type="email" id="mEmail" placeholder="Email Id" required />
-          </div>
-
-          <div class="field">
-            <label>Status</label>
-            <div class="select-wrapper">
-              <select id="mStatus">
-                <option value="Pending">Pending</option>
-                <option value="Open">Open</option>
-                <option value="Closed">Closed</option>
-              </select>
-              <span class="select-arrow">▾</span>
-            </div>
-          </div>
-
-          <div class="field">
-            <label>Commit Date *</label>
-            <div class="input-with-icon">
-              <input type="date" id="mCommitDate" required />
-              <span class="calendar-icon">📅</span>
-            </div>
-          </div>
-
-          <div class="field">
-            <label>Source *</label>
-            <div class="select-wrapper">
-              <select id="mSource" required>
-                <option value="" disabled selected>Select</option>
-                <option>By Mail</option>
-                <option>By Call</option>
-                <option>WhatsApp</option>
-                <option>Portal</option>
-              </select>
-              <span class="select-arrow">▾</span>
-            </div>
-          </div>
-
-          <div class="field">
-            <label>&nbsp;</label>
-            <button type="button" class="icon-btn" id="clearSourceBtn">✕</button>
-          </div>
-
-          <div class="field full">
-            <label>Call Description *</label>
-            <input type="text" id="mCallDesc" placeholder="Enter description" required />
-          </div>
         </div>
-
-        <div class="ticket-modal-footer">
-          <button type="submit" class="btn btn-blue">Save</button>
-        </div>
-      </form>
     </div>
-  </div>
 
-  <!-- HIDDEN FORM for Google Apps Script (no CORS) -->
-  <form
-    id="gsForm"
-    action="http://localhost/ticket_tool/save_ticket.php"
-    method="post"
-    target="hiddenFrame"
-    style="display:none;"
-  ></form>
-  <iframe name="hiddenFrame" style="display:none;"></iframe>
 
-  <script src="script.js"></script>
+<!-- Risk Modal -->
+<div id="risk-modal" class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-50 transition-opacity duration-300">
+    <div class="modal-overlay absolute w-full h-full bg-slate-900 opacity-50 backdrop-blur-sm" onclick="closeRiskModal()"></div>
+    <div class="modal-container bg-white w-11/12 md:max-w-md mx-auto rounded-xl shadow-2xl z-50 overflow-y-auto transform transition-all scale-95 p-6">
+        <h3 class="text-xl font-bold text-slate-900 mb-4" id="risk-modal-title">Add Risk / Blocker</h3>
+        <div class="space-y-4">
+            <input type="hidden" id="risk-edit-row-index">
+            <div>
+                <label class="block text-sm font-bold text-slate-600 mb-1">Risk Description</label>
+                <input id="risk-desc" type="text" class="w-full border border-slate-300 p-2 rounded text-sm" placeholder="e.g. Server Latency Issue">
+            </div>
+            <div>
+                <label class="block text-sm font-bold text-slate-600 mb-1">Mitigation Plan</label>
+                <textarea id="risk-mitigation" class="w-full border border-slate-300 p-2 rounded text-sm h-20 resize-none" placeholder="e.g. Upgrade AWS Instance type"></textarea>
+            </div>
+            <div>
+                <label class="block text-sm font-bold text-slate-600 mb-1">Owner</label>
+                <input id="risk-owner" type="text" class="w-full border border-slate-300 p-2 rounded text-sm" placeholder="e.g. DevOps Team">
+            </div>
+        </div>
+        <div class="flex justify-end gap-2 mt-6">
+            <button onclick="closeRiskModal()" class="px-4 py-2 text-slate-600 font-medium text-sm hover:bg-slate-100 rounded">Cancel</button>
+            <button onclick="saveRiskItem()" class="px-4 py-2 bg-red-600 text-white rounded font-semibold text-sm hover:bg-red-700">Save Risk</button>
+        </div>
+    </div>
+</div>
+
+
+
+    <!-- Action Item Modal -->
+<div id="action-modal" class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-50 transition-opacity duration-300">
+    <div class="modal-overlay absolute w-full h-full bg-slate-900 opacity-50 backdrop-blur-sm" onclick="closeActionModal()"></div>
+    <div class="modal-container bg-white w-11/12 md:max-w-md mx-auto rounded-xl shadow-2xl z-50 overflow-y-auto transform transition-all scale-95 p-6">
+        <h3 class="text-xl font-bold text-slate-900 mb-4" id="action-modal-title">Add Action Item</h3>
+        <div class="space-y-4">
+            <input type="hidden" id="action-edit-row-index">
+            <div>
+                <label class="block text-sm font-bold text-slate-600 mb-1">Task Description</label>
+                <input id="action-task" type="text" class="w-full border border-slate-300 p-2 rounded text-sm" placeholder="e.g. Update API Documentation">
+            </div>
+            <div>
+                <label class="block text-sm font-bold text-slate-600 mb-1">Owner</label>
+                <input id="action-owner" type="text" class="w-full border border-slate-300 p-2 rounded text-sm" placeholder="e.g. Mike Ross">
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-bold text-slate-600 mb-1">Priority</label>
+                    <select id="action-priority" class="w-full border border-slate-300 p-2 rounded text-sm">
+                        <option value="High">High</option>
+                        <option value="Med" selected>Med</option>
+                        <option value="Low">Low</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-600 mb-1">Due Date</label>
+                    <input id="action-date" type="date" class="w-full border border-slate-300 p-2 rounded text-sm">
+                </div>
+            </div>
+        </div>
+        <div class="flex justify-end gap-2 mt-6">
+            <button onclick="closeActionModal()" class="px-4 py-2 text-slate-600 font-medium text-sm hover:bg-slate-100 rounded">Cancel</button>
+            <button onclick="saveActionItem()" class="px-4 py-2 bg-blue-600 text-white rounded font-semibold text-sm hover:bg-blue-700">Save</button>
+        </div>
+    </div>
+</div>
+
+
+    <script src="script.js"></script>
+
+    <!-- Inline helpers (print + attachments) -->
+    <script>
+        // If external script.js already defines these, this will override them.
+        function printPDF() {
+            window.print();
+        }
+
+        function openAttachmentPicker() {
+            const el = document.getElementById('attachment-input');
+            if (el) el.click();
+        }
+
+        function handleAttachmentUpload(event) {
+            const files = event.target.files;
+            if (!files || !files.length) return;
+            const container = document.getElementById('docs-list');
+            Array.from(files).forEach(file => {
+                const div = document.createElement('div');
+                div.className = "group flex items-center gap-2";
+                // simple icon based on extension
+                const ext = (file.name.split('.').pop() || '').toLowerCase();
+                let icon = 'fa-file';
+                if (['pdf'].includes(ext)) icon = 'fa-file-pdf';
+                else if (['xls','xlsx','csv'].includes(ext)) icon = 'fa-file-excel';
+                else if (['doc','docx'].includes(ext)) icon = 'fa-file-word';
+                else if (['png','jpg','jpeg','gif','webp'].includes(ext)) icon = 'fa-image';
+
+                div.innerHTML = `
+                    <i class="fa-solid ${icon} text-slate-400 text-xs"></i>
+                    <span class="text-slate-700 text-sm">${file.name}</span>
+                    <button onclick="this.parentElement.remove()" class="text-slate-300 hover:text-red-500 no-print px-2">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                `;
+                container.appendChild(div);
+            });
+            // clear input so same file can be uploaded again if needed
+            event.target.value = "";
+        }
+    </script>
 </body>
 </html>
